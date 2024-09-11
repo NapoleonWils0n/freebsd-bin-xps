@@ -1,0 +1,135 @@
+#!/bin/sh
+
+#===============================================================================
+# ossuary
+#===============================================================================
+
+
+#===============================================================================
+# script usage
+#===============================================================================
+
+usage () {
+# if argument passed to function echo it
+[ -z "${1}" ] || echo "! ${1}"
+echo "\
+$(basename "$0") -m mount -f container -k gelikey 
+$(basename "$0") -m umount -f container"
+}
+
+#===============================================================================
+# error messages
+#===============================================================================
+
+ROOT_ERR="$(basename "$0") must be run as root"
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+INVALID_OPT_ERR='Invalid option:'
+REQ_ARG_ERR='requires an argument'
+
+
+#===============================================================================
+# check if script is run as root
+#===============================================================================
+
+[ "$(id -u)" -eq 0 ] || usage "${ROOT_ERR}"
+
+
+#===============================================================================
+# check number of aruments passed to script
+#===============================================================================
+
+[ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+
+#===============================================================================
+# getopts check options passed to script
+#===============================================================================
+
+while getopts ':m:f:k:h' opt
+do
+  case ${opt} in
+     m) mount="${OPTARG}";;
+     f) container="${OPTARG}";;
+     k) gelikey="${OPTARG}";;
+     h) usage;;
+     \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
+     :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+#===============================================================================
+# functions
+#===============================================================================
+
+# mount function
+mount () {
+    # group commands
+    { 
+    # mdconfig loopname from container
+    loopdevice=$(mdconfig -lf "${container}" | sed 's/[ \t]*$//')
+
+    # eli filepath
+    loopcrypt="/dev/${loopdevice}.eli"
+
+    # mdconfig create vnode from container
+    loop=$(mdconfig -a -t vnode -f "${container}")
+
+    # geli attach key to vnode
+    geli attach -k "${gelikey}" "${loop}"
+
+    # mdconfig loop device for container
+    loopdevice=$(mdconfig -lf "${container}" | sed 's/[ \t]*$//')
+
+    # path to mdconfig eli file
+    loopcrypt="/dev/${loopdevice}.eli"
+
+    # zpool name from mdconfig eli file
+    poolname=$(zdb -l "${loopcrypt}" | awk -F\' '/[[:blank:]]name/ {print $2; exit;}')
+
+    # zpool import pool
+    zpool import "${poolname}"
+
+    # mount point from zpool
+    mountpoint=$(zfs get -H -o value mountpoint "${poolname}");
+    } || { mdconfig -du "${loopdevice}" && exit; }
+}
+
+# umount function
+umount () {
+    # group commands
+    {
+    # mdconfig loopname from container
+    loopdevice=$(mdconfig -lf "${container}" | sed 's/[ \t]*$//')
+
+    # eli filepath
+    loopcrypt="/dev/${loopdevice}.eli"
+
+    # zpool name from eli file
+    poolname=$(zdb -l "${loopcrypt}" | awk -F\' '/[[:blank:]]name/ {print $2; exit;}')
+
+    # zfs umount poolname
+    zfs umount "${poolname}"
+
+    # zpool export poolname
+    zpool export "${poolname}"
+    sleep 1
+
+    # geli detach
+    geli detach "${loopcrypt}"
+
+    # mdconfig remove md file
+    mdconfig -du "${loopdevice}";
+    } || { echo 'container not mounted' && exit; }
+}
+
+
+#===============================================================================
+# mount and umount case statement
+#===============================================================================
+
+case "${mount}" in
+    mount) mount;;
+    umount) umount;;
+    *) usage;;
+esac
