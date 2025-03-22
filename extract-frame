@@ -77,17 +77,11 @@ shift $((OPTIND-1))
 infile_nopath="${infile##*/}"
 infile_name="${infile_nopath%.*}"
 
-# width
-# height
-
 # seconds default
 seconds_default='00:00:00'
 
 # image default
 image_default="png"
-
-# scale
-scale="-vf scale=${width:=-1}:${height:=-1}"
 
 # output file recording destination
 outfile_default="${infile_name}-[${seconds:=${seconds_default}}].${image:=${image_default}}"
@@ -109,6 +103,26 @@ extract () {
   "${outfile:=${outfile_default}}"
 }
 
-# run the extract function
-extract "${infile}"
+# image to video with scale function
+extract_scale () {
+  echo ffmpeg \
+  -hide_banner \
+  -stats -v panic \
+  -ss "${seconds:=${seconds_default}}" \
+  -i "${infile}" \
+  -q:v 2 -f image2 \
+  -vframes 1 \
+  -vf scale="${width:=-1}:${height:=-1}" \
+  "${outfile:=${outfile_default}}"
+}
 
+
+#===============================================================================
+# run function
+#===============================================================================
+
+if [ -n "${width}" ] || [ -n "${height}" ]; then
+  extract_scale "${infile}"
+else
+  extract "${infile}"
+fi
