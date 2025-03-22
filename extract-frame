@@ -21,7 +21,7 @@ echo "\
 # extract a frame from a video as a png or jpg
 https://trac.ffmpeg.org/wiki/Seeking
 
-$(basename "$0") -i input.(mp4|mov|mkv|m4v|webm) -s 00:00:00.000 -o output.png
+$(basename "$0") -i input.(mp4|mov|mkv|m4v|webm) -s 00:00:00.000 -w width -h height -t (png|jpg) -o output.png
 -i input.(mp4|mov|mkv|m4v)
 -s 00:00:00.000    : optional argument # if option not provided defaults to 00:00:00
 -t (png|jpg)       : optional argument # if option not provided defaults to png
