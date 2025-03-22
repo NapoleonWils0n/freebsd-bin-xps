@@ -25,6 +25,8 @@ $(basename "$0") -i input.(mp4|mov|mkv|m4v|webm) -s 00:00:00.000 -o output.png
 -i input.(mp4|mov|mkv|m4v)
 -s 00:00:00.000    : optional argument # if option not provided defaults to 00:00:00
 -t (png|jpg)       : optional argument # if option not provided defaults to png
+-w width           : optional argument # 
+-h height          : optional argument # 
 -o outfile.png     : optional argument # if option not provided defaults to input-name-timecode"
 exit 2
 }
@@ -50,12 +52,14 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check the options passed to the script
 #===============================================================================
 
-while getopts ':i:s:t:o:h' opt
+while getopts ':i:s:t:w:h:o:h' opt
 do
   case ${opt} in
      i) infile="${OPTARG}";;
      s) seconds="${OPTARG}";;
      t) image="${OPTARG}";;
+     w) width="${OPTARG}";;
+     h) height="${OPTARG}";;
      o) outfile="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
