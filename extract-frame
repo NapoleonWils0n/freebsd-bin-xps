@@ -92,7 +92,7 @@ outfile_default="${infile_name}-[${seconds:=${seconds_default}}].${image:=${imag
 
 # image to video function
 extract () {
-  echo ffmpeg \
+  ffmpeg \
   -hide_banner \
   -stats -v panic \
   -ss "${seconds:=${seconds_default}}" \
@@ -100,9 +100,9 @@ extract () {
   -q:v 2 -f image2 \
   -vframes 1 \
   -vf "scale=240:-1" \
-  "$@" \
   "${outfile:=${outfile_default}}"
 }
 
 # run the extract function
 extract "${infile}"
+
