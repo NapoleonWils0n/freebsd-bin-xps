@@ -103,7 +103,7 @@ extract () {
   -i "${infile}" \
   -q:v 2 -f image2 \
   -vframes 1 \
-  -vf "scale=${width:=-1}:${width:=-1}" \
+  -vf "scale=${width:=-1}:${height:=-1}" \
   "${outfile:=${outfile_default}}"
 }
 
