@@ -1,0 +1,112 @@
+#!/bin/sh
+
+#===============================================================================
+# Wrapper for whisper-cpp to handle local library path
+#===============================================================================
+
+#===============================================================================
+# script usage
+#===============================================================================
+
+usage () {
+[ -z "${1}" ] || echo "! ${1}"
+echo "Usage: $(basename "$0") -m model -f input
+
+Default formats: txt, srt, vtt
+To override: specify -o for each format: -o txt -o csv
+
+if you omit the -m option the default model will be used
+${HOME}/.local/share/whisper-models/ggml-large-v3-q4_0.bin"
+exit 1
+}
+
+
+#===============================================================================
+# error messages
+#===============================================================================
+
+WRONG_ARGS_ERR='wrong number of arguments passed to script'
+INVALID_OPT_ERR='Invalid option:'
+REQ_ARG_ERR='requires an argument'
+NOTFILE_ERR='not a file'
+LIB_ERR='libraries not found'
+
+
+#===============================================================================
+# check number of aruments passed to script
+#===============================================================================
+
+[ $# -gt 0 ] || usage "${WRONG_ARGS_ERR}"
+
+
+#===============================================================================
+# getopts check options passed to script
+#===============================================================================
+
+while getopts ':m:f:o:h' opt
+do
+  case ${opt} in
+     m) model="${OPTARG}"
+        [ -f "${model}" ] || usage "${model} ${NOTFILE_ERR}";;
+     f) input="${OPTARG}"
+        [ -f "${input}" ] || usage "${input} ${NOTFILE_ERR}";;
+     o) output="${output} -o${OPTARG}";;
+     h) usage;;
+     \?) OPTIND=$((OPTIND - 1)) # Handle passthrough of whisper-cpp options
+        break;;
+     :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
+  esac
+done
+shift $((OPTIND-1))
+
+
+
+#===============================================================================
+# input name
+#===============================================================================
+
+input_nopath="${input##*/}"
+input_name="${input_nopath%.*}"
+
+
+#===============================================================================
+# output default
+#===============================================================================
+
+output_default="-otxt -osrt -ovtt"
+
+
+#===============================================================================
+# check if default model exists
+#===============================================================================
+
+model_default="${HOME}/.local/share/whisper-models/ggml-large-v3-q4_0.bin"
+[ -f "${model_default}" ] || usage "${model_default} ${NOTFILE_ERR}"
+
+
+#===============================================================================
+# check if libraries exist
+#===============================================================================
+
+lib_path="${HOME}/.local/lib/whisper"
+
+if [ -f "${lib_path}/libwhisper.so.1" ]; then
+    export LD_LIBRARY_PATH="${HOME}/.local/lib/whisper:$LD_LIBRARY_PATH"
+else
+    usage "${lib_path} ${LIB_ERR}"
+fi
+
+#===============================================================================
+# function
+#===============================================================================
+
+transcribe () {
+exec whisper-cli -np -m "${model:=${model_default}}" -f "${input}" -of "${input_name}" ${output:=${output_default}} "${@}"
+}
+
+
+#===============================================================================
+# run function
+#===============================================================================
+
+transcribe "${@}"
