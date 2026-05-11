@@ -10,7 +10,7 @@
 
 usage () {
 [ -z "${1}" ] || echo "! ${1}"
-echo "Usage: $(basename "$0") -m model -f input -otxt -osrt -ovtt -ojf
+echo "Usage: $(basename "$0") -m model -f input -otxt -osrt -ovtt
 
 if you omit the -m option the default model will be used
 ${HOME}/.local/share/whisper-models/ggml-large-v3-q4_0.bin"
