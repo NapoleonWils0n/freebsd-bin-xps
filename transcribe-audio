@@ -13,7 +13,7 @@ usage () {
 echo "Usage: $(basename "$0") -m model -f input -otxt -osrt -ovtt
 
 if you omit the -m option the default model will be used
-${HOME}/.local/share/whisper-models/ggml-large-v3-q4_0.bin"
+${HOME}/.local/share/whisper-models/ggml-small.en.bin"
 exit 1
 }
 
@@ -67,7 +67,7 @@ input_name="${input_nopath%.*}"
 # check if default model exists
 #===============================================================================
 
-model_default="${HOME}/.local/share/whisper-models/ggml-large-v3-q4_0.bin"
+model_default="${HOME}/.local/share/whisper-models/ggml-small.en.bin"
 [ -f "${model_default}" ] || usage "${model_default} ${NOTFILE_ERR}"
 
 
