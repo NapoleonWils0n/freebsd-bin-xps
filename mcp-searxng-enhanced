@@ -9,6 +9,4 @@ export PYTHONUNBUFFERED=1
 exec /usr/local/bin/doas /usr/local/bin/podman run -i --rm --network=host \
     -e "SEARXNG_URL=http://localhost:8080" \
     -e "PYTHONUNBUFFERED=1" \
-    localhost/mcp-searxng-enhanced:local
-
-#| grep --line-buffered '^{"jsonrpc"'
+    localhost/mcp-searxng-enhanced:local | grep --line-buffered '^{"jsonrpc"'
