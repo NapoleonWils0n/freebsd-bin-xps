@@ -19,7 +19,10 @@ usage () {
 # if argument passed to function echo it
 [ -z "${1}" ] || echo "! ${1}"
 echo "\
-$(basename "$0") -i input"
+$(basename "$0") -i input -c on -v voice
+-i : accepts a text file
+-c on : reads the contents of the clipboard
+-v voice : specify the voice to use"
 exit 1
 }
 
