@@ -2,7 +2,7 @@
 
 
 #===============================================================================
-# srt-local - stream a local video with srt, video must be h264/aac
+# mux-local - stream a local video with srt, video must be h264/aac
 #===============================================================================
 
 
@@ -15,7 +15,8 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i input -s 00:00:00 -t 00:00:00"
+$(basename "$0") -f input -s 00:00:00 -t 00:00:00 -i ip -p port -o -
+-o - : optional argument sends the output to stdout"
 exit 2
 }
 
@@ -40,12 +41,15 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check options passed to script
 #===============================================================================
 
-while getopts ':s:i:t:h' opt
+while getopts 'f:i:p:s:t:o:h' opt
 do
   case ${opt} in
+     f) input="${OPTARG}";;
+     i) ip="${OPTARG}";;
+     p) port="${OPTARG}";;
      s) start="${OPTARG}";;
-     i) input="${OPTARG}";;
      t) end="${OPTARG}";;
+     o) output="${OPTARG}";;
      h) usage;;
      \?) usage "${INVALID_OPT_ERR} ${OPTARG}" 1>&2;;
      :) usage "${INVALID_OPT_ERR} ${OPTARG} ${REQ_ARG_ERR}" 1>&2;;
@@ -90,21 +94,23 @@ ip_default='192.168.1.131'
 # default port
 port_default='6882'
 
+# default output
+output_default="srt://${ip:=${ip_default}}:${port:=${port_default}}"
 
 #===============================================================================
 # one stream containing audio and video
 #===============================================================================
 
 one_stream () {
-ffmpeg \
--hide_banner \
--stats -v panic \
--y \
--re \
--i "${input}" \
--c:a copy -c:v copy \
--tune zerolatency \
--f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}"
+    ffmpeg \
+    -hide_banner \
+    -stats -v panic \
+    -y \
+    -re \
+    -i "${input}" \
+    -c:a copy -c:v copy \
+    -tune zerolatency \
+    -f mpegts "${output:=${output_default}}"
 }
 
 
@@ -131,7 +137,7 @@ one_stream_trim () {
     ${duration_arg} \
     -c:a copy -c:v copy \
     -tune zerolatency \
-    -f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}"
+    -f mpegts "${output:=${output_default}}"
 }
 
 

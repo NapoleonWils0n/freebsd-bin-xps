@@ -40,7 +40,7 @@ WRONG_ARGS_ERR='wrong number of arguments passed to script'
 # getopts check options passed to script
 #===============================================================================
 
-while getopts 'i:p:u:s:t:h' opt
+while getopts 'u:i:p:s:t:h' opt
 do
   case ${opt} in
      u) input="${OPTARG}";;
