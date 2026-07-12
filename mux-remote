@@ -2,7 +2,7 @@
 
 
 #===============================================================================
-# srt-remote - stream a remote video with srt, video must be h264/aac
+# mux-remote - stream a remote video with srt, video must be h264/aac
 #===============================================================================
 
 
@@ -15,7 +15,8 @@ usage () {
 [ -z "${1}" ] || echo "! ${1}"
 # display help
 echo "\
-$(basename "$0") -i ip/dns -p port -u input -s 00:00:00 -t 00:00:00"
+$(basename "$0") -u input -s 00:00:00 -t 00:00:00 -i ip/dns -p port -o -
+-o - : optional argument sends the output to stdout"
 exit 2
 }
 
@@ -65,6 +66,9 @@ ip_default='192.168.1.131'
 
 # default port
 port_default='6882'
+
+# default output
+output_default="srt://${ip:=${ip_default}}:${port:=${port_default}}?pkt_size=1316"
 
 
 #===============================================================================
@@ -116,7 +120,7 @@ one_stream () {
     -i "${url}" \
     -c:a copy -c:v copy \
     -tune zerolatency \
-    -f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}?pkt_size=1316"
+    -f mpegts "${output:=${output_default}}"
 }
 
 
@@ -143,7 +147,7 @@ one_stream_trim () {
     ${duration_arg} \
     -c:a copy -c:v copy \
     -tune zerolatency \
-    -f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}?pkt_size=1316"
+    -f mpegts "${output:=${output_default}}"
 }
 
 
@@ -165,7 +169,7 @@ two_streams () {
     -c:a copy -c:v copy \
     -tune zerolatency \
     -map 0:0 -map 1:0 \
-    -f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}?pkt_size=1316"
+    -f mpegts "${output:=${output_default}}"
 }
 
 
@@ -197,7 +201,7 @@ two_streams_trim () {
     -c:a copy -c:v copy \
     -tune zerolatency \
     -map 0:0 -map 1:0 \
-    -f mpegts "srt://${ip:=${ip_default}}:${port:=${port_default}}?pkt_size=1316"
+    -f mpegts "${output:=${output_default}}"
 }
 
 
