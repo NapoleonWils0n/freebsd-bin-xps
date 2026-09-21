@@ -1,0 +1,107 @@
+#!/bin/sh
+
+#===============================================================================
+# sauron - external video player script for newsboat
+#===============================================================================
+
+
+#===============================================================================
+# if script is run without arguments exit
+#===============================================================================
+
+[ $# -gt 0 ] || exit
+
+
+#===============================================================================
+# input set to args passed to script
+#===============================================================================
+
+input=$(printf "%s\n" "$@")
+
+
+#===============================================================================
+# mpv fullscreen on second display and taskspooler
+#===============================================================================
+
+mpv() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+        printf "%s" "${input}" | wl-copy \
+        && emacsclient -cF "((visibility . nil))" -e "(mpv-play-clipboard)" &
+    done
+}
+
+
+#===============================================================================
+# yt-dlp download
+#===============================================================================
+
+ytdlp() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      ts \
+      yt-dlp \
+      --no-playlist \
+      -o "$HOME/downloads/%(title)s.%(ext)s" \
+      "${line}" 1>/dev/null
+    done
+}
+
+
+#===============================================================================
+# open link in browser
+#===============================================================================
+
+open() {
+    printf "%s\n" "${input}" | \
+    while read -r line
+    do
+      xdg-open "${line}" 1>/dev/null 
+    done
+}
+
+
+#===============================================================================
+# copy url to the clipboard
+#===============================================================================
+
+copy() {
+    printf "%s" "${input}" | wl-copy 1>/dev/null
+}
+
+
+#===============================================================================
+# fzf prompt variables spaces to line up menu options
+#===============================================================================
+
+ytdlp_ts='yt-dlp       - yt-dlp download links'
+mpv='mpv          - mpv play video on current display'
+open='open         - open link in browser'
+copy='copy         - copy url'
+
+
+#===============================================================================
+# fzf prompt to specify function to run on links from ytfzf
+#===============================================================================
+
+menu=$(printf "%s\n" \
+	      "${ytdlp_ts}" \
+	      "${mpv}" \
+	      "${open}" \
+	      "${copy}" \
+	      | fzf --delimiter='\n' --prompt='Pipe links to: ' --info=inline --layout=reverse --no-multi)
+
+
+#===============================================================================
+# case statement to run function based on fzf prompt output
+#===============================================================================
+
+case "${menu}" in
+   yt-dlp*) ytdlp;;
+   mpv*) mpv;;
+   open*) open;;
+   copy*) copy;;
+   *) exit;;
+esac
