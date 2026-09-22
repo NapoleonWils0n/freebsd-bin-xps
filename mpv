@@ -15,4 +15,5 @@
 # run the wrapper-freebsd script
 #===============================================================================
 
-exec nv-sglrun /usr/local/bin/mpv "${@}"
+# suppress nv-sglrun output by sending to /dev/null
+exec nv-sglrun /usr/local/bin/mpv "${@}" 2>/dev/null
