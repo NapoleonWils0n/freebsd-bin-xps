@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #===============================================================================
-# sauron - external video player script for newsboat
+# sauron - external video player script for newsraft
 #===============================================================================
 
 
@@ -24,12 +24,7 @@ input=$(printf "%s\n" "$@")
 #===============================================================================
 
 mpv() {
-    printf "%s\n" "${input}" | \
-    while read -r line
-    do
-        printf "%s" "${input}" | wl-copy \
-        && emacsclient -cF "((visibility . nil))" -e "(mpv-play-clipboard)" &
-    done
+      emacsclient -cF "((visibility . nil))" -e "(mpv-play-remote-video \"${input}\")" &
 }
 
 
@@ -38,15 +33,11 @@ mpv() {
 #===============================================================================
 
 ytdlp() {
-    printf "%s\n" "${input}" | \
-    while read -r line
-    do
       ts \
       yt-dlp \
       --no-playlist \
-      -o "$HOME/downloads/%(title)s.%(ext)s" \
-      "${line}" 1>/dev/null
-    done
+      -o "${HOME}"/downloads/'%(title)s-[%(id)s]-%(upload_date>%Y-%m-%d)s.%(ext)s' \
+      "${input}" 1>/dev/null
 }
 
 
@@ -55,11 +46,7 @@ ytdlp() {
 #===============================================================================
 
 open() {
-    printf "%s\n" "${input}" | \
-    while read -r line
-    do
-      xdg-open "${line}" 1>/dev/null 
-    done
+       xdg-open "${input}" 
 }
 
 
@@ -68,7 +55,7 @@ open() {
 #===============================================================================
 
 copy() {
-    printf "%s" "${input}" | wl-copy 1>/dev/null
+    wl-copy "${input}"
 }
 
 
