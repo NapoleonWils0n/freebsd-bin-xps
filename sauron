@@ -42,31 +42,11 @@ ytdlp() {
 
 
 #===============================================================================
-# open link in browser
-#===============================================================================
-
-open() {
-       xdg-open "${input}" 
-}
-
-
-#===============================================================================
-# copy url to the clipboard
-#===============================================================================
-
-copy() {
-    wl-copy "${input}"
-}
-
-
-#===============================================================================
 # fzf prompt variables spaces to line up menu options
 #===============================================================================
 
 ytdlp_ts='yt-dlp       - yt-dlp download links'
 mpv='mpv          - mpv play video on current display'
-open='open         - open link in browser'
-copy='copy         - copy url'
 
 
 #===============================================================================
@@ -76,8 +56,6 @@ copy='copy         - copy url'
 menu=$(printf "%s\n" \
 	      "${ytdlp_ts}" \
 	      "${mpv}" \
-	      "${open}" \
-	      "${copy}" \
 	      | fzf --delimiter='\n' --prompt='Pipe links to: ' --info=inline --layout=reverse --no-multi 2>/dev/null)
 
 
@@ -88,7 +66,5 @@ menu=$(printf "%s\n" \
 case "${menu}" in
    yt-dlp*) ytdlp;;
    mpv*) mpv;;
-   open*) open;;
-   copy*) copy;;
    *) exit 0;;
 esac
