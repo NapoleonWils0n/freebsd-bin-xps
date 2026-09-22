@@ -78,7 +78,7 @@ menu=$(printf "%s\n" \
 	      "${mpv}" \
 	      "${open}" \
 	      "${copy}" \
-	      | fzf --delimiter='\n' --prompt='Pipe links to: ' --info=inline --layout=reverse --no-multi)
+	      | fzf --delimiter='\n' --prompt='Pipe links to: ' --info=inline --layout=reverse --no-multi 2>/dev/null)
 
 
 #===============================================================================
@@ -90,5 +90,5 @@ case "${menu}" in
    mpv*) mpv;;
    open*) open;;
    copy*) copy;;
-   *) exit;;
+   *) exit 0;;
 esac
