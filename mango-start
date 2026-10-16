@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# start mango with dbus
+exec dbus-run-session mango
